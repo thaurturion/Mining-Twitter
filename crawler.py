@@ -4,15 +4,13 @@ import tweepy
 import os, sys, time, csv
 import configparser
 
-config = configparser.ConfigParser()
-
 class CustomStreamListener(tweepy.StreamListener):
     
     #give the file a nice name
 
 
     date = time.strftime("%d-%m-%Y/")
-    directory = "/Users/fabian/Dropbox/Warwick/Dissertation/Code/UK-files-just-exact/" + date
+    directory = "data/crawled-tweets/" + date
     
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -39,7 +37,7 @@ class CustomStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
         flag = 0
-
+        
         if status.coordinates != None:
             longitude = status.coordinates["coordinates"][0]
             latitude = status.coordinates["coordinates"][1]
@@ -80,12 +78,15 @@ class CustomStreamListener(tweepy.StreamListener):
 
 
 def getStreamer():
+    config = configparser.ConfigParser()
     config.read('../credentials.ini')
+    
     consumer_key = config['Twitter']['consumer_key']
     consumer_secret = config['Twitter']['consumer_secret']
     access_key = config['Twitter']['access_key']
     access_secret = config['Twitter']['access_secret']
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+
     auth.set_access_token(access_key, access_secret)
     return tweepy.streaming.Stream(auth, CustomStreamListener())
 
