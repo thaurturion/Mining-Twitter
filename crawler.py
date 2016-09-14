@@ -10,7 +10,7 @@ class CustomStreamListener(tweepy.StreamListener):
 
 
     date = time.strftime("%d-%m-%Y/")
-    directory = "data/crawled-tweets/" + date
+    directory = "/Users/fabian/Dropbox/Warwick/Dissertation/Mining-Twitter/data/crawled-tweets/raw/" + date
     
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -33,7 +33,7 @@ class CustomStreamListener(tweepy.StreamListener):
     tweetsWriter = csv.writer(tweetsFile, dialect='mydialect')
 
     tweetCount = 0
-    limit = 1000000
+    limit = 100000
 
     def on_status(self, status):
         flag = 0
@@ -53,13 +53,13 @@ class CustomStreamListener(tweepy.StreamListener):
         if flag == 1 or flag == 2:
             data = [status.user.id_str, status.timestamp_ms, status.text.replace('\n', ''), longitude, latitude, status.retweet_count, status.favorite_count, flag]
             #data = str(status.user.id_str) + ", " + str(status.timestamp_ms) + ", " +  str(status.text) + ", " + str(longitude) + ", " + str(latitude) + ", " + str(status.retweet_count) + ", " + str(status.favorite_count) + ", " + flag
-            print(data)
-            if data != []:        
+            #print(data)
+            if len(data) == 8:        
                 CustomStreamListener.tweetsWriter.writerow(data)
                 self.tweetCount += 1
 
             if self.tweetCount % 1000 == 0:
-                print(str(self.tweetCount))
+                print(str(self.tweetCount) + " Tweets crawled.")
             if self.tweetCount > self.limit:
             	self.tweetsFile.close()
             	return False
@@ -79,7 +79,7 @@ class CustomStreamListener(tweepy.StreamListener):
 
 def getStreamer():
     config = configparser.ConfigParser()
-    config.read('../credentials.ini')
+    config.read('/Users/fabian/Dropbox/Warwick/Dissertation/credentials.ini')
     
     consumer_key = config['Twitter']['consumer_key']
     consumer_secret = config['Twitter']['consumer_secret']
@@ -101,7 +101,11 @@ def main():
     #SW 49.16209, -13.41393
     #-9.23, 2.69, 60.85, 49.84 
     # bounding_box:[west_long south_lat east_long north_lat]
-    strapi.filter(locations=[-13.41393,49.16209,1.76896,60.854691], stall_warnings=True, languages=["en"])   
+    try:
+        strapi.filter(locations=[-13.41393,49.16209,1.76896,60.854691], stall_warnings=True, languages=["en"])   
+    except:
+        print("ERRORROOROR")
+        strapi.disconnect()
 
 if __name__ == "__main__":
     main()
